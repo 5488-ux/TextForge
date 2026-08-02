@@ -67,6 +67,20 @@ struct WhatsNewView: View {
             )
 
             WhatsNewRow(
+                icon: "chart.bar.fill",
+                color: TextForgePalette.blue,
+                title: "导入不卡了",
+                detail: "文件在后台分块复制，并显示文件名、阶段、数量和真实字节进度。"
+            )
+
+            WhatsNewRow(
+                icon: "doc.richtext.fill",
+                color: TextForgePalette.violet,
+                title: "Markdown 预览重做",
+                detail: "后台解析和懒加载渲染，适配标题、列表、编号、引用、代码块与分隔线。"
+            )
+
+            WhatsNewRow(
                 icon: "doc.badge.plus",
                 color: .green,
                 title: "文件导入修复",

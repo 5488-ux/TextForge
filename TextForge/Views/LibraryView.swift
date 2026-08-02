@@ -110,14 +110,13 @@ struct LibraryView: View {
         let urls = pendingImportURLs
         pendingImportURLs = []
 
-        do {
-            var imported: TextFile?
-            for url in urls {
-                imported = try store.importFile(from: url)
+        Task {
+            do {
+                let importedFiles = try await store.importFiles(from: urls)
+                selectedFile = importedFiles.last
+            } catch {
+                store.report(error)
             }
-            selectedFile = imported
-        } catch {
-            store.report(error)
         }
     }
 

@@ -63,7 +63,7 @@ struct EditorView: View {
                 }
             }
         }
-        .task { load() }
+        .task { await load() }
         .onChange(of: text) { _, _ in
             guard isLoaded else { return }
             isDirty = true
@@ -106,7 +106,19 @@ struct EditorView: View {
 
     private var editorSurface: some View {
         Group {
-            if file.isMarkdown && mode == .preview {
+            if !isLoaded {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(TextForgePalette.blue)
+                    Text("正在加载文稿…")
+                        .font(.subheadline.bold())
+                    Text("大文件放到后台读取，界面不会再冻住。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if file.isMarkdown && mode == .preview {
                 MarkdownPreview(text: text)
             } else {
                 ZStack(alignment: .topLeading) {
@@ -170,10 +182,10 @@ struct EditorView: View {
         }
     }
 
-    private func load() {
+    private func load() async {
         guard !isLoaded else { return }
         do {
-            text = try store.read(file)
+            text = try await store.readAsync(file)
             isLoaded = true
         } catch {
             store.report(error)
@@ -213,9 +225,12 @@ struct EditorView: View {
 private struct MarkdownPreview: View {
     let text: String
 
+    @State private var blocks: [MarkdownBlock] = []
+    @State private var isRendering = false
+
     var body: some View {
-        ScrollView {
-            Group {
+        ZStack(alignment: .topTrailing) {
+            ScrollView {
                 if text.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "doc.richtext")
@@ -227,18 +242,145 @@ private struct MarkdownPreview: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 80)
-                } else if let attributed = try? AttributedString(
-                    markdown: text,
-                    options: .init(interpretedSyntax: .full)
-                ) {
-                    Text(attributed)
+                } else if blocks.isEmpty && isRendering {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .controlSize(.large)
+                            .tint(TextForgePalette.violet)
+                        Text("正在渲染 Markdown…")
+                            .font(.subheadline.bold())
+                        Text("解析放在后台，长文档也不会卡住界面。")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 80)
                 } else {
-                    Text(text)
+                    LazyVStack(alignment: .leading, spacing: 10) {
+                        ForEach(blocks) { block in
+                            MarkdownBlockView(block: block)
+                        }
+                    }
+                    .frame(maxWidth: 760, alignment: .leading)
+                    .frame(maxWidth: .infinity)
+                    .padding(20)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
             .textSelection(.enabled)
-            .padding(20)
+
+            if isRendering && !blocks.isEmpty {
+                ProgressView()
+                    .tint(TextForgePalette.violet)
+                    .padding(10)
+                    .background(.ultraThinMaterial, in: Circle())
+                    .padding(12)
+            }
+        }
+        .task(id: text) {
+            await renderMarkdown()
+        }
+    }
+
+    private func renderMarkdown() async {
+        if text.isEmpty {
+            blocks = []
+            isRendering = false
+            return
+        }
+
+        isRendering = true
+        try? await Task.sleep(for: .milliseconds(100))
+        guard !Task.isCancelled else { return }
+
+        let source = text
+        let parsed = await Task.detached(priority: .userInitiated) {
+            MarkdownRenderer.parse(source)
+        }.value
+
+        guard !Task.isCancelled else { return }
+        blocks = parsed
+        isRendering = false
+    }
+}
+
+private struct MarkdownBlockView: View {
+    let block: MarkdownBlock
+
+    var body: some View {
+        switch block.kind {
+        case .heading(let level):
+            Text(block.attributed)
+                .font(headingFont(level))
+                .fontWeight(level <= 2 ? .heavy : .bold)
+                .padding(.top, level == 1 ? 8 : 3)
+
+        case .paragraph:
+            Text(block.attributed)
+                .font(.body)
+                .lineSpacing(4)
+
+        case .bullet:
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Circle()
+                    .fill(TextForgePalette.violet)
+                    .frame(width: 6, height: 6)
+                Text(block.attributed)
+                    .font(.body)
+                    .lineSpacing(3)
+            }
+            .padding(.leading, 6)
+
+        case .numbered(let marker):
+            HStack(alignment: .firstTextBaseline, spacing: 9) {
+                Text(marker)
+                    .font(.subheadline.bold().monospacedDigit())
+                    .foregroundStyle(TextForgePalette.blue)
+                    .frame(minWidth: 24, alignment: .trailing)
+                Text(block.attributed)
+                    .font(.body)
+                    .lineSpacing(3)
+            }
+
+        case .quote:
+            HStack(alignment: .top, spacing: 12) {
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(TextForgePalette.violet)
+                    .frame(width: 4)
+                Text(block.attributed)
+                    .font(.body.italic())
+                    .foregroundStyle(.secondary)
+                    .padding(.vertical, 4)
+            }
+            .padding(12)
+            .background(TextForgePalette.violet.opacity(0.08), in: RoundedRectangle(cornerRadius: 14))
+
+        case .code:
+            ScrollView(.horizontal, showsIndicators: false) {
+                Text(block.content)
+                    .font(.system(.callout, design: .monospaced))
+                    .foregroundStyle(Color(red: 0.88, green: 0.92, blue: 1.00))
+                    .textSelection(.enabled)
+                    .padding(14)
+            }
+            .background(Color(red: 0.10, green: 0.12, blue: 0.20), in: RoundedRectangle(cornerRadius: 14))
+
+        case .separator:
+            Divider()
+                .padding(.vertical, 6)
+
+        case .spacer:
+            Color.clear
+                .frame(height: 4)
+        }
+    }
+
+    private func headingFont(_ level: Int) -> Font {
+        switch level {
+        case 1: return .largeTitle
+        case 2: return .title
+        case 3: return .title2
+        case 4: return .title3
+        default: return .headline
         }
     }
 }

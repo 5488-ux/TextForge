@@ -19,6 +19,7 @@
 		A1000000000000000000000A /* TextForgeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* TextForgeTheme.swift */; };
 		A1000000000000000000000B /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* WhatsNewView.swift */; };
 		A1000000000000000000000C /* TextDocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* TextDocumentPicker.swift */; };
+		A1000000000000000000000D /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* MarkdownRenderer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		B1000000000000000000000C /* TextForgeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextForgeTheme.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000E /* TextDocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDocumentPicker.swift; sourceTree = "<group>"; };
+		B1000000000000000000000F /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				B10000000000000000000003 /* DocumentStore.swift */,
+				B1000000000000000000000F /* MarkdownRenderer.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -206,6 +209,7 @@
 				A1000000000000000000000A /* TextForgeTheme.swift in Sources */,
 				A1000000000000000000000B /* WhatsNewView.swift in Sources */,
 				A1000000000000000000000C /* TextDocumentPicker.swift in Sources */,
+				A1000000000000000000000D /* MarkdownRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,7 +267,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -286,7 +290,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.3;
+				MARKETING_VERSION = 1.1.4;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

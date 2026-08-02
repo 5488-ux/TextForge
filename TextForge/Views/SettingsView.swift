@@ -30,7 +30,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TextForge")
                         .font(.system(size: 27, weight: .heavy, design: .rounded))
-                    Text("版本 1.1.3 · 原生 SwiftUI")
+                    Text("版本 1.1.4 · 原生 SwiftUI")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -95,6 +95,14 @@ struct SettingsView: View {
                 title: "更新日志",
                 subtitle: "每次更新到底改了什么"
             )
+
+            timelineEntry(
+                version: "1.1.4",
+                date: "2026-08-03",
+                text: "导入改为后台分块复制并显示真实进度；Markdown 改为后台分块渲染，补齐标题、列表、引用和代码块版式。"
+            )
+
+            Divider().opacity(0.45)
 
             timelineEntry(
                 version: "1.1.3",
