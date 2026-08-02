@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @EnvironmentObject private var store: DocumentStore
+    @Binding var requestedFile: TextFile?
     @State private var query = ""
     @State private var isImporterPresented = false
     @State private var isNewFilePresented = false
@@ -68,7 +69,13 @@ struct LibraryView: View {
         } message: {
             Text(store.errorMessage ?? "未知错误")
         }
-        .onAppear { store.reload() }
+        .onAppear {
+            store.reload()
+            openRequestedFileIfNeeded()
+        }
+        .onChange(of: requestedFile) { _, file in
+            if file != nil { openRequestedFileIfNeeded() }
+        }
     }
 
     private var header: some View {
@@ -100,6 +107,12 @@ struct LibraryView: View {
             }
         }
         .padding(.vertical, 8)
+    }
+
+    private func openRequestedFileIfNeeded() {
+        guard let file = requestedFile else { return }
+        selectedFile = file
+        requestedFile = nil
     }
 
     private var searchField: some View {
