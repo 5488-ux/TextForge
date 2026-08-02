@@ -1,0 +1,103 @@
+---
+workflows:
+  unsigned-ios-ipa:
+    name: TextForge Unsigned iOS IPA
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      xcode: 26.0
+      vars:
+        XCODE_PROJECT: TextForge.xcodeproj
+        XCODE_SCHEME: TextForge
+        TARGET_ID: E10000000000000000000001
+        APP_NAME: TextForge.app
+        DERIVED_DATA: build/DerivedData
+    scripts:
+      - name: Verify project and shared scheme
+        script: |
+          set -euo pipefail
+          PBXPROJ="$CM_BUILD_DIR/$XCODE_PROJECT/project.pbxproj"
+          SCHEME="$CM_BUILD_DIR/$XCODE_PROJECT/xcshareddata/xcschemes/$XCODE_SCHEME.xcscheme"
+
+          test -s "$PBXPROJ"
+          test -s "$SCHEME"
+          grep -Fq "$TARGET_ID /* $XCODE_SCHEME */ = {" "$PBXPROJ"
+          grep -Fq "isa = PBXNativeTarget;" "$PBXPROJ"
+          grep -Fq "BlueprintIdentifier = \"$TARGET_ID\"" "$SCHEME"
+          grep -Fq "BuildableName = \"$APP_NAME\"" "$SCHEME"
+
+          xcodebuild -version
+          xcodebuild -list -project "$CM_BUILD_DIR/$XCODE_PROJECT"
+          xcodebuild -showBuildSettings \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release | tee "$CM_BUILD_DIR/build-settings.txt"
+
+          grep -Eq \
+            '^[[:space:]]*PRODUCT_NAME = TextForge$' \
+            "$CM_BUILD_DIR/build-settings.txt"
+          grep -Eq \
+            '^[[:space:]]*IPHONEOS_DEPLOYMENT_TARGET = 17\.0$' \
+            "$CM_BUILD_DIR/build-settings.txt"
+
+      - name: Resolve Swift packages
+        script: |
+          set -euo pipefail
+          xcodebuild -resolvePackageDependencies \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME"
+
+      - name: Build unsigned Release app
+        script: |
+          set -euo pipefail
+          rm -rf "$CM_BUILD_DIR/$DERIVED_DATA"
+          xcodebuild build \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$CM_BUILD_DIR/$DERIVED_DATA" \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            | tee "$CM_BUILD_DIR/xcodebuild.log"
+
+      - name: Package and verify unsigned IPA
+        script: |
+          set -euo pipefail
+          APP_PATH="$CM_BUILD_DIR/$DERIVED_DATA/Build/Products/Release-iphoneos/$APP_NAME"
+          PACKAGE_DIR="$CM_BUILD_DIR/build/ios/package"
+          IPA_DIR="$CM_BUILD_DIR/build/ios/ipa"
+          IPA_PATH="$IPA_DIR/TextForge-unsigned.ipa"
+
+          test -d "$APP_PATH"
+          test -s "$APP_PATH/Info.plist"
+          EXECUTABLE_NAME="$(
+            /usr/libexec/PlistBuddy \
+              -c 'Print :CFBundleExecutable' \
+              "$APP_PATH/Info.plist"
+          )"
+          test -n "$EXECUTABLE_NAME"
+          test -s "$APP_PATH/$EXECUTABLE_NAME"
+
+          rm -rf "$PACKAGE_DIR" "$IPA_DIR"
+          mkdir -p "$PACKAGE_DIR/Payload" "$IPA_DIR"
+          ditto "$APP_PATH" "$PACKAGE_DIR/Payload/$APP_NAME"
+
+          cd "$PACKAGE_DIR"
+          /usr/bin/zip -qry "$IPA_PATH" Payload
+
+          test -s "$IPA_PATH"
+          unzip -t "$IPA_PATH"
+          unzip -Z1 "$IPA_PATH" | grep -Fq "Payload/$APP_NAME/Info.plist"
+          unzip -Z1 "$IPA_PATH" | grep -Fq "Payload/$APP_NAME/$EXECUTABLE_NAME"
+          printf \
+            'Unsigned IPA verified: %s (%s bytes)\n' \
+            "$IPA_PATH" \
+            "$(stat -f%z "$IPA_PATH")"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - xcodebuild.log
+      - build-settings.txt
