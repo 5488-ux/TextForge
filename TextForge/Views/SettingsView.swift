@@ -30,7 +30,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TextForge")
                         .font(.system(size: 27, weight: .heavy, design: .rounded))
-                    Text("版本 1.1.1 · 原生 SwiftUI")
+                    Text("版本 1.1.2 · 原生 SwiftUI")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -95,6 +95,14 @@ struct SettingsView: View {
                 title: "更新日志",
                 subtitle: "每次更新到底改了什么"
             )
+
+            timelineEntry(
+                version: "1.1.2",
+                date: "2026-08-02",
+                text: "增加每个版本首次启动只显示一次的更新日志弹窗。"
+            )
+
+            Divider().opacity(0.45)
 
             timelineEntry(
                 version: "1.1.1",

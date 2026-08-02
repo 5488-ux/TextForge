@@ -17,6 +17,7 @@
 		A10000000000000000000008 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* SettingsView.swift */; };
 		A10000000000000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* Assets.xcassets */; };
 		A1000000000000000000000A /* TextForgeTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* TextForgeTheme.swift */; };
+		A1000000000000000000000B /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* WhatsNewView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		B1000000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1000000000000000000000B /* TextForge.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TextForge.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000000000000000000000C /* TextForgeTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextForgeTheme.swift; sourceTree = "<group>"; };
+		B1000000000000000000000D /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 				B10000000000000000000007 /* EditorView.swift */,
 				B10000000000000000000008 /* SettingsView.swift */,
 				B1000000000000000000000C /* TextForgeTheme.swift */,
+				B1000000000000000000000D /* WhatsNewView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 				A10000000000000000000007 /* EditorView.swift in Sources */,
 				A10000000000000000000008 /* SettingsView.swift in Sources */,
 				A1000000000000000000000A /* TextForgeTheme.swift in Sources */,
+				A1000000000000000000000B /* WhatsNewView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +259,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -278,7 +282,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.1;
+				MARKETING_VERSION = 1.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
