@@ -4,6 +4,7 @@ struct EditorView: View {
     enum MarkdownMode: String, CaseIterable, Identifiable {
         case edit = "修改"
         case preview = "预览"
+
         var id: String { rawValue }
     }
 
@@ -23,48 +24,29 @@ struct EditorView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            if file.isMarkdown {
-                Picker("Markdown 模式", selection: $mode) {
-                    ForEach(MarkdownMode.allCases) { item in
-                        Text(item.rawValue).tag(item)
-                    }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal)
-                .padding(.vertical, 10)
-            }
+        ZStack {
+            TextForgeBackground()
 
-            Group {
-                if file.isMarkdown && mode == .preview {
-                    MarkdownPreview(text: text)
-                } else {
-                    TextEditor(text: $text)
-                        .font(.system(.body, design: .monospaced))
-                        .scrollContentBackground(.hidden)
-                        .padding(.horizontal, 10)
-                        .background(Color(uiColor: .systemBackground))
+            VStack(spacing: 12) {
+                if file.isMarkdown {
+                    markdownSwitcher
                 }
-            }
 
-            HStack {
-                Label("\(text.count) 字符", systemImage: "textformat.size")
-                Spacer()
-                Text(isDirty ? "正在保存…" : "已保存")
+                editorSurface
+                statusBar
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-            .background(.bar)
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 10)
         }
         .navigationTitle(file.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 ShareLink(item: file.url) {
-                    Label("分享", systemImage: "square.and.arrow.up")
+                    Image(systemName: "square.and.arrow.up")
                 }
+
                 Menu {
                     Button {
                         renameText = file.name
@@ -72,11 +54,12 @@ struct EditorView: View {
                     } label: {
                         Label("重命名", systemImage: "pencil")
                     }
+
                     Button { saveNow() } label: {
                         Label("立即保存", systemImage: "square.and.arrow.down")
                     }
                 } label: {
-                    Label("更多", systemImage: "ellipsis.circle")
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -96,6 +79,94 @@ struct EditorView: View {
             Button("确定") { rename() }
         } message: {
             Text("扩展名也能一起改，别手滑删没了。")
+        }
+    }
+
+    private var markdownSwitcher: some View {
+        HStack(spacing: 12) {
+            HStack(spacing: 7) {
+                Image(systemName: "doc.richtext.fill")
+                    .foregroundStyle(TextForgePalette.violet)
+                Text("Markdown")
+                    .font(.subheadline.bold())
+            }
+
+            Spacer()
+
+            Picker("Markdown 模式", selection: $mode) {
+                ForEach(MarkdownMode.allCases) { item in
+                    Text(item.rawValue).tag(item)
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 180)
+        }
+        .textForgeGlassCard(padding: 12, cornerRadius: 20)
+    }
+
+    private var editorSurface: some View {
+        Group {
+            if file.isMarkdown && mode == .preview {
+                MarkdownPreview(text: text)
+            } else {
+                ZStack(alignment: .topLeading) {
+                    if text.isEmpty {
+                        Text(emptyPrompt)
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(.tertiary)
+                            .padding(.horizontal, 17)
+                            .padding(.vertical, 16)
+                            .allowsHitTesting(false)
+                    }
+
+                    TextEditor(text: $text)
+                        .font(.system(.body, design: .monospaced))
+                        .scrollContentBackground(.hidden)
+                        .padding(9)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.white.opacity(0.58), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(.white.opacity(0.86), lineWidth: 1)
+        }
+        .shadow(color: TextForgePalette.indigo.opacity(0.08), radius: 22, y: 10)
+    }
+
+    private var statusBar: some View {
+        HStack(spacing: 12) {
+            Label("\(text.count) 字符", systemImage: "textformat.size")
+
+            if !file.fileExtension.isEmpty {
+                Text(file.typeLabel)
+                    .font(.caption2.bold())
+                    .foregroundStyle(TextForgePalette.blue)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(TextForgePalette.blue.opacity(0.10), in: Capsule())
+            }
+
+            Spacer()
+
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(isDirty ? Color.orange : Color.green)
+                    .frame(width: 7, height: 7)
+                Text(isDirty ? "正在保存" : "已保存")
+            }
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .textForgeGlassCard(padding: 10, cornerRadius: 18)
+    }
+
+    private var emptyPrompt: String {
+        switch file.fileExtension {
+        case "md", "markdown": "# 从这里开始写 Markdown…"
+        case "srt": "1\n00:00:00,000 --> 00:00:03,000\n从这里开始写字幕…"
+        default: "从这里开始输入…"
         }
     }
 
@@ -145,7 +216,18 @@ private struct MarkdownPreview: View {
     var body: some View {
         ScrollView {
             Group {
-                if let attributed = try? AttributedString(
+                if text.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "doc.richtext")
+                            .font(.system(size: 34))
+                            .foregroundStyle(TextForgePalette.violet)
+                        Text("写点 Markdown，再来看预览。")
+                            .font(.headline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 80)
+                } else if let attributed = try? AttributedString(
                     markdown: text,
                     options: .init(interpretedSyntax: .full)
                 ) {
@@ -156,8 +238,7 @@ private struct MarkdownPreview: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .textSelection(.enabled)
-            .padding(18)
+            .padding(20)
         }
-        .background(Color(uiColor: .secondarySystemBackground))
     }
 }
