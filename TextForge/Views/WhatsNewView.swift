@@ -67,6 +67,13 @@ struct WhatsNewView: View {
             )
 
             WhatsNewRow(
+                icon: "doc.badge.plus",
+                color: .green,
+                title: "文件导入修复",
+                detail: "换用原生文档选择器，选中文件后点击“打开”会立即导入并进入编辑器。"
+            )
+
+            WhatsNewRow(
                 icon: "sparkles.rectangle.stack.fill",
                 color: TextForgePalette.violet,
                 title: "每版更新说明",

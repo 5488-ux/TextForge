@@ -51,7 +51,7 @@ struct RootView: View {
         ) as? String {
             return version
         }
-        return "1.1.2"
+        return "1.1.3"
     }
 
     private func presentWhatsNewIfNeeded() {

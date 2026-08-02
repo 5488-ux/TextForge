@@ -1,5 +1,4 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @EnvironmentObject private var store: DocumentStore
@@ -8,6 +7,7 @@ struct LibraryView: View {
     @State private var isImporterPresented = false
     @State private var isNewFilePresented = false
     @State private var selectedFile: TextFile?
+    @State private var pendingImportURLs: [URL] = []
 
     private var filteredFiles: [TextFile] {
         guard !query.isEmpty else { return store.files }
@@ -36,21 +36,11 @@ struct LibraryView: View {
         .navigationDestination(for: TextFile.self) { file in
             EditorView(file: file)
         }
-        .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.item],
-            allowsMultipleSelection: true
-        ) { result in
-            do {
-                let urls = try result.get()
-                var imported: TextFile?
-                for url in urls {
-                    imported = try store.importFile(from: url)
-                }
-                selectedFile = imported
-            } catch {
-                store.report(error)
+        .sheet(isPresented: $isImporterPresented, onDismiss: importPendingFiles) {
+            TextDocumentPicker(isPresented: $isImporterPresented) { urls in
+                pendingImportURLs = urls
             }
+            .ignoresSafeArea()
         }
         .sheet(isPresented: $isNewFilePresented) {
             NewFileView { file in
@@ -113,6 +103,22 @@ struct LibraryView: View {
         guard let file = requestedFile else { return }
         selectedFile = file
         requestedFile = nil
+    }
+
+    private func importPendingFiles() {
+        guard !pendingImportURLs.isEmpty else { return }
+        let urls = pendingImportURLs
+        pendingImportURLs = []
+
+        do {
+            var imported: TextFile?
+            for url in urls {
+                imported = try store.importFile(from: url)
+            }
+            selectedFile = imported
+        } catch {
+            store.report(error)
+        }
     }
 
     private var searchField: some View {

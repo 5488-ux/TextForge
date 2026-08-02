@@ -30,7 +30,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TextForge")
                         .font(.system(size: 27, weight: .heavy, design: .rounded))
-                    Text("版本 1.1.2 · 原生 SwiftUI")
+                    Text("版本 1.1.3 · 原生 SwiftUI")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -95,6 +95,14 @@ struct SettingsView: View {
                 title: "更新日志",
                 subtitle: "每次更新到底改了什么"
             )
+
+            timelineEntry(
+                version: "1.1.3",
+                date: "2026-08-02",
+                text: "重做文件导入器，修复选中文件后点击“打开”没有反应。"
+            )
+
+            Divider().opacity(0.45)
 
             timelineEntry(
                 version: "1.1.2",
