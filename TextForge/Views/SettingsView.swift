@@ -30,7 +30,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TextForge")
                         .font(.system(size: 27, weight: .heavy, design: .rounded))
-                    Text("版本 1.1.5 · 原生 SwiftUI")
+                    Text("版本 1.2.0 · 原生 SwiftUI")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -52,7 +52,7 @@ struct SettingsView: View {
             TextForgeSectionTitle(
                 title: "目前功能",
                 subtitle: "不是画饼，这些现在就能用",
-                trailingText: "5"
+                trailingText: "9"
             )
 
             FeatureRow(
@@ -85,6 +85,30 @@ struct SettingsView: View {
                 title: "文件管理",
                 detail: "搜索、排序、类型、体积和修改时间"
             )
+            FeatureRow(
+                icon: "text.magnifyingglass",
+                color: TextForgePalette.blue,
+                title: "查找与替换",
+                detail: "支持大小写、正则、替换下一处和全部替换"
+            )
+            FeatureRow(
+                icon: "captions.bubble.fill",
+                color: .orange,
+                title: "SRT 时间轴工具",
+                detail: "检查字幕、重新编号和整体提前或延后"
+            )
+            FeatureRow(
+                icon: "character.book.closed.fill",
+                color: TextForgePalette.violet,
+                title: "编码与换行保留",
+                detail: "保留 UTF、GB18030、CRLF、LF，也能手动切换"
+            )
+            FeatureRow(
+                icon: "doc.badge.clock",
+                color: .green,
+                title: "大文件模式",
+                detail: "超过 1 MB 自动关闭频繁保存和实时 Markdown 渲染"
+            )
         }
         .textForgeGlassCard()
     }
@@ -95,6 +119,14 @@ struct SettingsView: View {
                 title: "更新日志",
                 subtitle: "每次更新到底改了什么"
             )
+
+            timelineEntry(
+                version: "1.2.0",
+                date: "2026-08-03",
+                text: "加入查找替换、SRT 时间轴工具、原编码与换行保留，以及超过 1 MB 自动启用的大文件模式。"
+            )
+
+            Divider().opacity(0.45)
 
             timelineEntry(
                 version: "1.1.5",

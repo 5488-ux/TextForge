@@ -67,6 +67,34 @@ struct WhatsNewView: View {
             )
 
             WhatsNewRow(
+                icon: "text.magnifyingglass",
+                color: TextForgePalette.blue,
+                title: "查找替换",
+                detail: "支持大小写、正则、匹配统计、替换下一处和全部替换。"
+            )
+
+            WhatsNewRow(
+                icon: "captions.bubble.fill",
+                color: .orange,
+                title: "SRT 时间轴工具",
+                detail: "一键检查字幕结构、重新连续编号，并按秒整体提前或延后。"
+            )
+
+            WhatsNewRow(
+                icon: "character.book.closed.fill",
+                color: TextForgePalette.violet,
+                title: "不再乱改编码",
+                detail: "打开时识别 UTF、GB18030 和换行格式，保存时原样保留，也能手动切换。"
+            )
+
+            WhatsNewRow(
+                icon: "doc.badge.clock",
+                color: .green,
+                title: "大文件模式",
+                detail: "超过 1 MB 自动停用频繁自动保存和实时 Markdown 渲染，少卡一点。"
+            )
+
+            WhatsNewRow(
                 icon: "hand.tap.fill",
                 color: .green,
                 title: "按钮恢复正常",

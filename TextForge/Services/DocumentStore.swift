@@ -132,27 +132,45 @@ final class DocumentStore: ObservableObject {
         }
     }
 
-    func read(_ file: TextFile) throws -> String {
-        let data = try Data(contentsOf: file.url)
-        guard let text = Self.decode(data: data) else {
-            throw DocumentError.binaryFile
-        }
-        return text
+    func read(_ file: TextFile) throws -> DocumentContent {
+        try Self.decodeDocument(data: Data(contentsOf: file.url))
     }
 
-    func readAsync(_ file: TextFile) async throws -> String {
+    func readAsync(_ file: TextFile) async throws -> DocumentContent {
         let url = file.url
         return try await Task.detached(priority: .userInitiated) {
-            let data = try Data(contentsOf: url)
-            guard let text = Self.decode(data: data) else {
-                throw DocumentError.binaryFile
-            }
-            return text
+            try Self.decodeDocument(data: Data(contentsOf: url))
         }.value
     }
 
-    func save(_ text: String, to file: TextFile) throws {
-        try text.write(to: file.url, atomically: true, encoding: .utf8)
+    func save(
+        _ text: String,
+        to file: TextFile,
+        encoding: DocumentTextEncoding,
+        lineEnding: DocumentLineEnding
+    ) throws {
+        let normalized = Self.normalizeLineEndings(text)
+        let output = lineEnding == .lf
+            ? normalized
+            : normalized.replacingOccurrences(of: "\n", with: lineEnding.separator)
+
+        guard var data = output.data(using: encoding.foundationEncoding) else {
+            throw DocumentError.encodingFailed(encoding.rawValue)
+        }
+
+        if encoding == .utf8BOM {
+            data.insert(contentsOf: [0xEF, 0xBB, 0xBF], at: 0)
+        } else if encoding == .utf16LittleEndian {
+            data.insert(contentsOf: [0xFF, 0xFE], at: 0)
+        } else if encoding == .utf16BigEndian {
+            data.insert(contentsOf: [0xFE, 0xFF], at: 0)
+        } else if encoding == .utf32LittleEndian {
+            data.insert(contentsOf: [0xFF, 0xFE, 0x00, 0x00], at: 0)
+        } else if encoding == .utf32BigEndian {
+            data.insert(contentsOf: [0x00, 0x00, 0xFE, 0xFF], at: 0)
+        }
+
+        try data.write(to: file.url, options: .atomic)
         reload()
     }
 
@@ -180,17 +198,96 @@ final class DocumentStore: ObservableObject {
     }
 
     nonisolated static func decode(data: Data) -> String? {
-        if data.isEmpty { return "" }
-        let encodings: [String.Encoding] = [
-            .utf8, .utf16, .utf16LittleEndian, .utf16BigEndian,
-            .utf32, .unicode, .ascii, .isoLatin1
-        ]
-        for encoding in encodings {
-            if let value = String(data: data, encoding: encoding), !looksBinary(value) {
-                return value
+        try? decodeDocument(data: data).text
+    }
+
+    nonisolated static func decodeDocument(data: Data) throws -> DocumentContent {
+        if data.isEmpty {
+            return DocumentContent(text: "", encoding: .utf8, lineEnding: .lf, byteCount: 0)
+        }
+
+        let detected = detectEncoding(data)
+        guard let rawText = String(data: detected.payload, encoding: detected.encoding.foundationEncoding),
+              !looksBinary(rawText) else {
+            throw DocumentError.binaryFile
+        }
+
+        return DocumentContent(
+            text: normalizeLineEndings(rawText),
+            encoding: detected.encoding,
+            lineEnding: detectLineEnding(rawText),
+            byteCount: Int64(data.count)
+        )
+    }
+
+    nonisolated private static func detectEncoding(
+        _ data: Data
+    ) -> (encoding: DocumentTextEncoding, payload: Data) {
+        let bytes = [UInt8](data.prefix(4))
+
+        if bytes.starts(with: [0xEF, 0xBB, 0xBF]) {
+            return (.utf8BOM, Data(data.dropFirst(3)))
+        }
+        if bytes.starts(with: [0xFF, 0xFE, 0x00, 0x00]) {
+            return (.utf32LittleEndian, Data(data.dropFirst(4)))
+        }
+        if bytes.starts(with: [0x00, 0x00, 0xFE, 0xFF]) {
+            return (.utf32BigEndian, Data(data.dropFirst(4)))
+        }
+        if bytes.starts(with: [0xFF, 0xFE]) {
+            return (.utf16LittleEndian, Data(data.dropFirst(2)))
+        }
+        if bytes.starts(with: [0xFE, 0xFF]) {
+            return (.utf16BigEndian, Data(data.dropFirst(2)))
+        }
+
+        if let utf8 = String(data: data, encoding: .utf8), !looksBinary(utf8) {
+            return (.utf8, data)
+        }
+
+        let sample = [UInt8](data.prefix(4_096))
+        if sample.count >= 4 {
+            let evenBytes = sample.indices.filter { $0.isMultiple(of: 2) }
+            let oddBytes = sample.indices.filter { !$0.isMultiple(of: 2) }
+            let evenZeroRatio = Double(evenBytes.filter { sample[$0] == 0 }.count) / Double(evenBytes.count)
+            let oddZeroRatio = Double(oddBytes.filter { sample[$0] == 0 }.count) / Double(oddBytes.count)
+
+            if oddZeroRatio > 0.20,
+               let value = String(data: data, encoding: .utf16LittleEndian),
+               !looksBinary(value) {
+                return (.utf16LittleEndian, data)
+            }
+            if evenZeroRatio > 0.20,
+               let value = String(data: data, encoding: .utf16BigEndian),
+               !looksBinary(value) {
+                return (.utf16BigEndian, data)
             }
         }
-        return nil
+
+        for encoding in [DocumentTextEncoding.gb18030, .isoLatin1] {
+            if let value = String(data: data, encoding: encoding.foundationEncoding),
+               !looksBinary(value) {
+                return (encoding, data)
+            }
+        }
+        return (.utf8, data)
+    }
+
+    nonisolated private static func detectLineEnding(_ text: String) -> DocumentLineEnding {
+        let crlfCount = text.components(separatedBy: "\r\n").count - 1
+        let remaining = text.replacingOccurrences(of: "\r\n", with: "")
+        let lfCount = remaining.filter { $0 == "\n" }.count
+        let crCount = remaining.filter { $0 == "\r" }.count
+
+        if crlfCount >= lfCount && crlfCount >= crCount && crlfCount > 0 { return .crlf }
+        if crCount > lfCount && crCount > 0 { return .cr }
+        return .lf
+    }
+
+    nonisolated private static func normalizeLineEndings(_ text: String) -> String {
+        text
+            .replacingOccurrences(of: "\r\n", with: "\n")
+            .replacingOccurrences(of: "\r", with: "\n")
     }
 
     nonisolated private static func looksBinary(_ text: String) -> Bool {
@@ -361,12 +458,14 @@ enum DocumentError: LocalizedError {
     case binaryFile
     case invalidName
     case fileExists
+    case encodingFailed(String)
 
     var errorDescription: String? {
         switch self {
         case .binaryFile: "这个文件像是二进制文件，不能当文本硬啃。"
         case .invalidName: "文件名不能为空。"
         case .fileExists: "同名文件已经存在。"
+        case .encodingFailed(let encoding): "文本无法用 \(encoding) 保存，请换成 UTF-8。"
         }
     }
 }

@@ -20,6 +20,7 @@
 		A1000000000000000000000B /* WhatsNewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* WhatsNewView.swift */; };
 		A1000000000000000000000C /* TextDocumentPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000E /* TextDocumentPicker.swift */; };
 		A1000000000000000000000D /* MarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* MarkdownRenderer.swift */; };
+		A1000000000000000000000E /* SRTTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* SRTTools.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		B1000000000000000000000D /* WhatsNewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNewView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000E /* TextDocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextDocumentPicker.swift; sourceTree = "<group>"; };
 		B1000000000000000000000F /* MarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownRenderer.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* SRTTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SRTTools.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +87,7 @@
 			children = (
 				B10000000000000000000003 /* DocumentStore.swift */,
 				B1000000000000000000000F /* MarkdownRenderer.swift */,
+				B10000000000000000000010 /* SRTTools.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 				A1000000000000000000000B /* WhatsNewView.swift in Sources */,
 				A1000000000000000000000C /* TextDocumentPicker.swift in Sources */,
 				A1000000000000000000000D /* MarkdownRenderer.swift in Sources */,
+				A1000000000000000000000E /* SRTTools.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,13 +265,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -284,13 +288,13 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.5;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
