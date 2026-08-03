@@ -62,7 +62,7 @@ struct RootView: View {
         ) as? String {
             return version
         }
-        return "1.2.0"
+        return "1.2.1"
     }
 
     private func presentWhatsNewIfNeeded() {

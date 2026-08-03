@@ -13,7 +13,7 @@ struct TextDocumentPicker: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
         let picker = UIDocumentPickerViewController(
             forOpeningContentTypes: [.data],
-            asCopy: false
+            asCopy: true
         )
         picker.delegate = context.coordinator
         picker.allowsMultipleSelection = true
@@ -26,10 +26,12 @@ struct TextDocumentPicker: UIViewControllerRepresentable {
         _ uiViewController: UIDocumentPickerViewController,
         context: Context
     ) {
+        context.coordinator.parent = self
     }
 
+    @MainActor
     final class Coordinator: NSObject, UIDocumentPickerDelegate {
-        private let parent: TextDocumentPicker
+        var parent: TextDocumentPicker
 
         init(parent: TextDocumentPicker) {
             self.parent = parent
@@ -39,8 +41,8 @@ struct TextDocumentPicker: UIViewControllerRepresentable {
             _ controller: UIDocumentPickerViewController,
             didPickDocumentsAt urls: [URL]
         ) {
-            parent.onPick(urls)
             parent.isPresented = false
+            parent.onPick(urls)
         }
 
         func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {

@@ -67,6 +67,13 @@ struct WhatsNewView: View {
             )
 
             WhatsNewRow(
+                icon: "folder.fill.badge.plus",
+                color: .green,
+                title: "“打开”按钮修好了",
+                detail: "选中文件后立即复制并导入，不再等关闭回调，也不再被原地访问权限卡住。"
+            )
+
+            WhatsNewRow(
                 icon: "text.magnifyingglass",
                 color: TextForgePalette.blue,
                 title: "查找替换",

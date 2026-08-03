@@ -7,7 +7,6 @@ struct LibraryView: View {
     @State private var isImporterPresented = false
     @State private var isNewFilePresented = false
     @State private var selectedFile: TextFile?
-    @State private var pendingImportURLs: [URL] = []
 
     private var filteredFiles: [TextFile] {
         guard !query.isEmpty else { return store.files }
@@ -36,9 +35,9 @@ struct LibraryView: View {
         .navigationDestination(for: TextFile.self) { file in
             EditorView(file: file)
         }
-        .sheet(isPresented: $isImporterPresented, onDismiss: importPendingFiles) {
+        .sheet(isPresented: $isImporterPresented) {
             TextDocumentPicker(isPresented: $isImporterPresented) { urls in
-                pendingImportURLs = urls
+                importFiles(urls)
             }
             .ignoresSafeArea()
         }
@@ -105,11 +104,9 @@ struct LibraryView: View {
         requestedFile = nil
     }
 
-    private func importPendingFiles() {
-        guard !pendingImportURLs.isEmpty else { return }
-        let urls = pendingImportURLs
-        pendingImportURLs = []
-
+    private func importFiles(_ urls: [URL]) {
+        guard !urls.isEmpty else { return }
+        isImporterPresented = false
         Task {
             do {
                 let importedFiles = try await store.importFiles(from: urls)
