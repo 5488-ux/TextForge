@@ -26,6 +26,7 @@ final class DocumentStore: ObservableObject {
     @Published var errorMessage: String?
 
     private let fileManager = FileManager.default
+    private var activeImportID: UUID?
 
     let supportedExtensions = [
         "srt", "txt", "md", "markdown", "json", "jsonl", "csv", "tsv",
@@ -83,6 +84,8 @@ final class DocumentStore: ObservableObject {
 
         let totalFiles = sources.count
         var importedFiles: [TextFile] = []
+        let importID = UUID()
+        activeImportID = importID
 
         do {
             for (index, source) in sources.enumerated() {
@@ -103,6 +106,7 @@ final class DocumentStore: ObservableObject {
                     to: destination
                 ) { [weak self] fraction, phase in
                     Task { @MainActor [weak self] in
+                        guard self?.activeImportID == importID else { return }
                         self?.importProgress = DocumentImportProgress(
                             fileName: fileName,
                             completedFiles: index,
@@ -116,10 +120,12 @@ final class DocumentStore: ObservableObject {
                 importedFiles.append(TextFile(url: destination))
             }
 
+            activeImportID = nil
             importProgress = nil
             reload()
             return importedFiles
         } catch {
+            activeImportID = nil
             importProgress = nil
             reload()
             throw error

@@ -67,6 +67,13 @@ struct WhatsNewView: View {
             )
 
             WhatsNewRow(
+                icon: "hand.tap.fill",
+                color: .green,
+                title: "按钮恢复正常",
+                detail: "导入进度加入会话隔离，迟到回调不会再用透明遮罩锁死整个界面。"
+            )
+
+            WhatsNewRow(
                 icon: "chart.bar.fill",
                 color: TextForgePalette.blue,
                 title: "导入不卡了",

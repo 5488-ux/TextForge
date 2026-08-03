@@ -267,7 +267,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -290,7 +290,7 @@
 				INFOPLIST_FILE = TextForge/Supporting/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = TextForge;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = cn.textforge.editor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

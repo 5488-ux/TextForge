@@ -30,7 +30,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("TextForge")
                         .font(.system(size: 27, weight: .heavy, design: .rounded))
-                    Text("版本 1.1.4 · 原生 SwiftUI")
+                    Text("版本 1.1.5 · 原生 SwiftUI")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -95,6 +95,14 @@ struct SettingsView: View {
                 title: "更新日志",
                 subtitle: "每次更新到底改了什么"
             )
+
+            timelineEntry(
+                version: "1.1.5",
+                date: "2026-08-03",
+                text: "修复迟到的导入进度遮罩覆盖全屏，导致所有按钮无法点击。"
+            )
+
+            Divider().opacity(0.45)
 
             timelineEntry(
                 version: "1.1.4",

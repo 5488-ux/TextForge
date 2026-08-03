@@ -62,7 +62,7 @@ struct RootView: View {
         ) as? String {
             return version
         }
-        return "1.1.4"
+        return "1.1.5"
     }
 
     private func presentWhatsNewIfNeeded() {
@@ -125,6 +125,6 @@ private struct ImportProgressOverlay: View {
             .textForgeGlassCard()
             .padding(.horizontal, 24)
         }
-        .allowsHitTesting(true)
+        .allowsHitTesting(false)
     }
 }
